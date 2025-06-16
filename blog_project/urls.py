@@ -15,7 +15,6 @@ schema_view = get_schema_view(
       title="Документация API для блог-сайта",
       default_version='v1',
       description="Регистрация + логин на одном эндпоинте, просмотр профиля, просмотр новых публикаций и создание публикаций.",
-      contact=openapi.Contact(email="admin@example.com"),
       license=openapi.License(name="MIT License"),
    ),
    public=True,
