@@ -6,11 +6,6 @@ from .serializers import PostSerializer
 
 
 class PostListCreateAPIView(APIView):
-    """
-    Представление для получения списка постов и создания нового поста.
-    GET — возвращает ленту постов, с опциональным поиском по заголовку (?search=).
-    POST — создаёт новый пост. Требуется авторизация.
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -25,6 +20,11 @@ class PostListCreateAPIView(APIView):
     def post(self, request):
         """
         Создать новый пост. Требуется авторизация.
+                - Поля тела запроса:
+            - title
+            - content
+            - profession
+            - image
         """
         serializer = PostSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
@@ -34,10 +34,6 @@ class PostListCreateAPIView(APIView):
 
 
 class LikePostAPIView(APIView):
-    """
-    Представление для лайка/дизлайка поста по его ID.
-    Если пользователь уже поставил лайк — убирает его. Иначе — добавляет.
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, post_id):
