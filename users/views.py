@@ -8,6 +8,22 @@ from rest_framework.permissions import IsAuthenticated
 User = get_user_model()
 
 class AuthAPIView(APIView):
+    """
+    Регистрация и логин пользователя через один эндпоинт.
+
+    Метод POST:
+    - Если пользователь с таким email уже существует и пароль верный — возвращается токен (вход).
+    - Если пользователь не найден — создаётся новый пользователь и выдается токен (регистрация).
+
+    Параметры запроса:
+    - email: строка, обязательно (только @gmail.com).
+    - password: строка, обязательно (не менее 6 символов).
+
+    Ответ:
+    - message: статус операции (регистрация или вход).
+    - email: email пользователя.
+    - token: токен авторизации.
+    """
     def post(self, request):
         serializer = AuthSerializer(data=request.data)
         if not serializer.is_valid():
@@ -21,7 +37,6 @@ class AuthAPIView(APIView):
             if not user.check_password(password):
                 return Response({'error': 'Неверный пароль'}, status=400)
 
-            # Выдаём токен
             token, created = Token.objects.get_or_create(user=user)
             return Response({
                 'message': 'Успешный вход',
@@ -38,7 +53,21 @@ class AuthAPIView(APIView):
                 'token': token.key
             })
 
+
 class ProfileAPIView(APIView):
+    """
+    Получение профиля авторизованного пользователя.
+
+    Метод GET:
+    - Требуется авторизация по токену.
+    - Возвращает email текущего пользователя.
+
+    Заголовки:
+    - Authorization: Token <токен>
+
+    Ответ:
+    - email: email текущего пользователя.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
