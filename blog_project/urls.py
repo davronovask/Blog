@@ -8,17 +8,24 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
 from users.views import AuthAPIView, ProfileAPIView
-from posts.views import PostListCreateAPIView
+from posts.views import PostListCreateAPIView, LikePostAPIView
 
 schema_view = get_schema_view(
-   openapi.Info(
-      title="Документация API для блог-сайта",
-      default_version='v1',
-      description="Регистрация + логин на одном эндпоинте, просмотр профиля, просмотр новых публикаций и создание публикаций.",
-      license=openapi.License(name="MIT License"),
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
+    openapi.Info(
+        title="Документация API для блог-сайта",
+        default_version='v1',
+        description=(
+            "API для блог-сайта включает:\n"
+            "- Регистрацию и логин на одном эндпоинте\n"
+            "- Просмотр профиля (по токену)\n"
+            "- Получение ленты и создание публикаций\n"
+            "- Лайки/анлайки публикаций\n"
+            "- Поиск постов по заголовку (title)\n"
+        ),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
@@ -29,6 +36,7 @@ urlpatterns = [
     path('api/v1/users/', AuthAPIView.as_view()),         # Регистрация + логин
     path('api/v1/profile/', ProfileAPIView.as_view()),    # Профиль (нужен токен)
     path('api/v1/posts/', PostListCreateAPIView.as_view()),  # Лента + создать пост
+    path('api/v1/posts/<int:post_id>/like/', LikePostAPIView.as_view(), name='like-post'), #лайк и анлайк
 ]
 
 if settings.DEBUG:
