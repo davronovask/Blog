@@ -36,12 +36,12 @@ class PostListCreateAPIView(GenericAPIView):
 
 
 class LikePostAPIView(APIView):
+    """
+    Лайк или дизлайк поста. Возвращает только количество лайков.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, post_id):
-        """
-        Лайкнуть или убрать лайк с поста по его ID.
-        """
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
@@ -50,7 +50,7 @@ class LikePostAPIView(APIView):
         user = request.user
         if user in post.likes.all():
             post.likes.remove(user)
-            return Response({"message": "Unliked"}, status=status.HTTP_200_OK)
         else:
             post.likes.add(user)
-            return Response({"message": "Liked"}, status=status.HTTP_200_OK)
+
+        return Response({"likes_count": post.likes.count()}, status=status.HTTP_200_OK)
