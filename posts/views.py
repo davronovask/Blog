@@ -37,7 +37,7 @@ class PostListCreateAPIView(GenericAPIView):
 
 class LikePostAPIView(APIView):
     """
-    Лайк или дизлайк поста. Возвращает только количество лайков.
+    Лайк или дизлайк поста. Возвращает количество лайков и статус is_liked.
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -50,7 +50,12 @@ class LikePostAPIView(APIView):
         user = request.user
         if user in post.likes.all():
             post.likes.remove(user)
+            is_liked = False
         else:
             post.likes.add(user)
+            is_liked = True
 
-        return Response({"likes_count": post.likes.count()}, status=status.HTTP_200_OK)
+        return Response({
+            "likes_count": post.likes.count(),
+            "is_liked": is_liked
+        }, status=status.HTTP_200_OK)
