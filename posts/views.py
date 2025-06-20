@@ -1,3 +1,4 @@
+from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -5,8 +6,9 @@ from .models import Post
 from .serializers import PostSerializer
 
 
-class PostListCreateAPIView(APIView):
+class PostListCreateAPIView(GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = PostSerializer
 
     def get(self, request):
         """
