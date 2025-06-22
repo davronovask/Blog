@@ -2,31 +2,50 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from users.models import CustomUser
 
-class AuthSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+    password2 = serializers.CharField(write_only=True, min_length=6)
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'email',
+            'nickname',
+            'password',
+            'password2'
+        ]
 
     def validate_email(self, value):
         if not value.endswith('@gmail.com'):
             raise serializers.ValidationError("Email должен быть на @gmail.com")
         return value
 
-    def validate_password(self, value):
-        if len(value) < 6:
-            raise serializers.ValidationError("Пароль должен быть не менее 6 символов")
-        return value
+    def validate(self, data):
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError({"password": "Пароли не совпадают"})
+        return data
 
     def create(self, validated_data):
-        return CustomUser.objects.create_user(
+        validated_data.pop('password2')
+        user = CustomUser.objects.create_user(
             email=validated_data['email'],
+            nickname=validated_data['nickname'],
             password=validated_data['password']
         )
-
-    def authenticate_user(self):
-        user = authenticate(
-            email=self.validated_data['email'],
-            password=self.validated_data['password']
-        )
-        if user is None:
-            raise serializers.ValidationError("Неверный email или пароль")
         return user
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    def validate_email(self, value):
+        if not value.endswith('@gmail.com'):
+            raise serializers.ValidationError("Email должен быть на @gmail.com")
+        return value
+
+    def validate(self, data):
+        user = authenticate(email=data['email'], password=data['password'])
+        if not user:
+            raise serializers.ValidationError("Неверный email или пароль")
+        data['user'] = user
+        return data

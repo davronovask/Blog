@@ -2,63 +2,49 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-from .serializers import AuthSerializer
+from rest_framework import status, permissions
 from rest_framework.permissions import IsAuthenticated
+
+
+from posts.models import Post
+from posts.serializers import PostSerializer
+from .serializers import RegisterSerializer, LoginSerializer
 
 User = get_user_model()
 
-class AuthAPIView(APIView):
-
-    """
-    Регистрация и логин пользователя через один эндпоинт.
-
-    Метод POST:
-    - Если пользователь с таким email уже существует и пароль верный — возвращается токен (вход).
-    - Если пользователь не найден — создаётся новый пользователь и выдается токен (регистрация).
-    """
+class RegisterAPIView(APIView):
     def post(self, request):
-        serializer = AuthSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
-
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
-
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
             user = serializer.save()
             token = Token.objects.create(user=user)
             return Response({
-                'email': user.email,
-                'token': token.key
-            }, status=201)
+                "email": user.email,
+                "nickname": user.nickname,
+                "token": token.key
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user.check_password(password):
-            return Response({'error': 'Неверный пароль'}, status=400)
 
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'email': user.email,
-            'token': token.key
-        }, status=200)
+class LoginAPIView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({
+                "email": user.email,
+                "nickname": user.nickname,
+                "token": token.key
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProfileAPIView(APIView):
-    """
-    Получение профиля авторизованного пользователя.
-
-    Метод GET:
-    - Требуется авторизация по токену.
-    - Возвращает email текущего пользователя.
-
-    Заголовки:
-    - Authorization: Token <токен>
-
-    Ответ:
-    - email: email текущего пользователя.
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({"email": request.user.email})
+        return Response({
+            "email": request.user.email,
+            "nickname": request.user.nickname
+        })

@@ -2,6 +2,8 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+
+from users.views import User
 from .models import Post
 from .serializers import PostSerializer
 
@@ -11,12 +13,16 @@ class PostListCreateAPIView(GenericAPIView):
     serializer_class = PostSerializer
 
     def get(self, request):
-        """
-        Получить список всех постов. Можно фильтровать по заголовку с помощью параметра ?search=.
-        """
-        search = request.query_params.get('search', '')
-        posts = Post.objects.filter(title__icontains=search).order_by('-created_at')
-        serializer = PostSerializer(posts, many=True, context={'request': request})
+        nickname = request.query_params.get('nickname')
+        posts = Post.objects.all()
+        if nickname:
+            try:
+                user = User.objects.get(nickname=nickname)
+                posts = posts.filter(author=user)
+            except User.DoesNotExist:
+                return Response({"error": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
+        posts = posts.order_by('-created_at')  # сортировка по дате (сначала новые)
+        serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
     def post(self, request):

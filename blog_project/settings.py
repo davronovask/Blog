@@ -150,15 +150,6 @@ SPECTACULAR_SETTINGS = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Token': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
-        }
-    }
-}
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
