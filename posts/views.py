@@ -1,3 +1,5 @@
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,6 +9,10 @@ from users.views import User
 from .models import Post
 from .serializers import PostSerializer
 
+@extend_schema(
+    responses=PostSerializer(many=True),
+    description="Получить список постов. Можно фильтровать по `nickname` в query-параметрах. Пример(/?nickname=...)"
+)
 
 class PostListCreateAPIView(GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -40,7 +46,13 @@ class PostListCreateAPIView(GenericAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@extend_schema(
+    responses={
+        200: OpenApiTypes.OBJECT,
+        404: {"error": "Post not found"}
+    },
+    description="Лайк/дизлайк поста"
+)
 class LikePostAPIView(APIView):
     """
     Лайк или дизлайк поста. Возвращает количество лайков и статус is_liked.

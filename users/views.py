@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -12,6 +13,14 @@ from .serializers import RegisterSerializer, LoginSerializer
 
 User = get_user_model()
 
+@extend_schema(
+    request=RegisterSerializer,
+    responses={
+        201: RegisterSerializer,
+        400: dict,
+    },
+    description="Регистрация нового пользователя"
+)
 class RegisterAPIView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -25,6 +34,14 @@ class RegisterAPIView(APIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@extend_schema(
+    request=LoginSerializer,
+    responses={
+        200: LoginSerializer,
+        400: dict,
+    },
+    description="Авторизация пользователя"
+)
 
 class LoginAPIView(APIView):
     def post(self, request):
