@@ -15,4 +15,4 @@ class Post(models.Model):
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_posts', blank=True)
 
     def __str__(self):
-        return self.title
+        return self.profession
