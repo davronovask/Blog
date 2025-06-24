@@ -7,7 +7,7 @@ class Post(models.Model):
         on_delete=models.CASCADE,
         related_name='posts'
     )
-    title = models.CharField(max_length=255)
+
     content = models.TextField()
     profession = models.CharField(max_length=255, blank=True, null=True)
     image = models.ImageField(upload_to='post_images/', blank=True, null=True)

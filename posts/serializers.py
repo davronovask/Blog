@@ -4,6 +4,7 @@ from drf_spectacular.utils import extend_schema_field
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField(read_only=True)
+    nickname = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
 
@@ -12,7 +13,7 @@ class PostSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'author',
-            'title',
+            'nickname',
             'content',
             'profession',
             'image',
@@ -21,6 +22,9 @@ class PostSerializer(serializers.ModelSerializer):
             'is_liked',
         ]
         read_only_fields = ['author', 'created_at']
+
+    def get_nickname(self, obj):
+        return obj.author.nickname
 
     @extend_schema_field(serializers.IntegerField())
     def get_likes_count(self, obj):
