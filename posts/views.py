@@ -28,7 +28,7 @@ class PostListCreateAPIView(GenericAPIView):
             except User.DoesNotExist:
                 return Response({"error": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
         posts = posts.order_by('-created_at')  # сортировка по дате (сначала новые)
-        serializer = PostSerializer(posts, many=True)
+        serializer = PostSerializer(posts, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
